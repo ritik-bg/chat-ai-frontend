@@ -6,12 +6,14 @@ import './App.css'
 import AIFlowChat from './Components/chatArea'
 import { Routes, BrowserRouter, Route } from "react-router"
 import AllChats from './Pages/AllChats'
+import { Toaster } from 'sonner'
 
 function App() {
   const [count, setCount] = useState(0)
 
   return (
     <>
+      <Toaster theme="dark" richColors position='top-right' />
     <div className='h-[100vh] w-[100vw]'>
     <BrowserRouter>
     <Routes>

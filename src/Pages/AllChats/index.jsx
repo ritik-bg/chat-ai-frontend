@@ -129,21 +129,6 @@ const TAG_COLORS = {
   },
 };
 
-const MODEL_ICONS = {
-  llama: "🦙",
-  deepseek: "🔍",
-  gemma: "💎",
-  mistral: "💨",
-  phi: "Φ",
-};
-
-function getModelIcon(model) {
-  for (const [key, icon] of Object.entries(MODEL_ICONS)) {
-    if (model.toLowerCase().includes(key)) return icon;
-  }
-  return "🤖";
-}
-
 export default function AllChats() {
   const [search, setSearch] = useState("");
   const [activeTag, setActiveTag] = useState("all");
@@ -171,10 +156,8 @@ export default function AllChats() {
       const data = await res.json();
 
       console.log("response of save chats", data);
-console.log(data?.data,"data?.data");
+      console.log(data?.data, "data?.data");
       if (data?.data.length > 0) {
-        
-        
         setprevousChats(data.data);
       } else {
         alert("no chats found");
@@ -207,7 +190,10 @@ console.log(data?.data,"data?.data");
                   {prevousChats.length} chats across all models
                 </p>
               </div>
-              <button onClick={()=>naviagate("/create-chat")} className="new-chat-btn">
+              <button
+                onClick={() => naviagate("/create-chat")}
+                className="new-chat-btn"
+              >
                 <svg
                   width="14"
                   height="14"
@@ -294,6 +280,9 @@ console.log(data?.data,"data?.data");
             <div className="chat-list">
               {prevousChats?.map((chat, i) => {
                 const tagColor = TAG_COLORS[chat.tag] || TAG_COLORS.code;
+
+                console.log(chat, "chat");
+
                 return (
                   <div
                     key={chat.id}
@@ -305,23 +294,9 @@ console.log(data?.data,"data?.data");
                     onMouseEnter={() => setHoveredId(chat.id)}
                     onMouseLeave={() => setHoveredId(null)}
                   >
-                    {/* Icon */}
-                    {/* <div className="chat-icon">{getModelIcon(chat.model)}</div> */}
-
-                    {/* Body */}
                     <div className="chat-body">
                       <div className="chat-title-row">
                         <span className="chat-title">{chat?.prompt}</span>
-                        {/* <span
-                          className="tag-pill"
-                          style={{
-                            background: tagColor.bg,
-                            border: `1px solid ${tagColor.border}`,
-                            color: tagColor.text,
-                          }}
-                        >
-                          {chat.reply}
-                        </span> */}
                       </div>
                       <div
                         style={{
@@ -332,12 +307,6 @@ console.log(data?.data,"data?.data");
                       >
                         <span className="chat-preview">{chat?.preview}</span>
                       </div>
-                      {/* <div style={{ marginTop: 6 }}>
-                        <span className="model-pill">
-                          <span>{getModelIcon(chat.model)}</span>
-                          {chat.model}
-                        </span>
-                      </div> */}
                     </div>
 
                     {/* Meta */}

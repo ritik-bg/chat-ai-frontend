@@ -1,1 +1,1 @@
-export const BASEURL ="http://localhost:3002/api" 
+export const BASEURL ="https://chat-ai-backend-w6y2.onrender.com/api" 

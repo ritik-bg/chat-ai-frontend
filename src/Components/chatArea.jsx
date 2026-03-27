@@ -11,8 +11,8 @@ import ReactFlow, {
 } from "reactflow";
 import "reactflow/dist/style.css";
 import { BASEURL } from "../config/api.config";
-import {useNavigate} from "react-router"
-
+import { useNavigate } from "react-router";
+import { toast } from "sonner";
 
 function AnimatedEdge({
   id,
@@ -563,9 +563,7 @@ export default function AIFlowChat() {
   const [model, setModel] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  
-
-  // console.log(prompt,"prompt");
+  const navigate = useNavigate();
 
   const handleSaveConvo = async () => {
     if (!prompt.trim() || !response.trim) return;
@@ -577,9 +575,11 @@ export default function AIFlowChat() {
       });
       const data = await res?.json();
 
-      console.log(data, "data of the save api");
-
-      if (data.error) throw new Error(data.error);
+      if (!data) {
+        return toast.error("error while saving chats");
+      } else {
+        toast.success("chat saved successfully");
+      }
     } catch (error) {
       console.error("error while saving conversation", error);
     }
@@ -598,6 +598,9 @@ export default function AIFlowChat() {
         body: JSON.stringify({ prompt }),
       });
       const data = await res.json();
+      if (!data) {
+        return toastr("unable to ask ai");
+      }
       if (data.error) throw new Error(data.error);
       setResponse(data.reply);
       setModel(data.model || "");
@@ -822,7 +825,7 @@ export default function AIFlowChat() {
           // disabled={data.loading || !data.prompt.trim()}
           className="nodrag "
           style={{
-            marginTop: "50px",
+            marginTop: "70px",
             // width: "150px",
             padding: "12px",
             borderRadius: "12px",
@@ -839,7 +842,7 @@ export default function AIFlowChat() {
               "#0f1729",
             fontWeight: 700,
             position: "absolute",
-            right: "0px",
+            left: "50px",
             fontSize: "13px",
             fontFamily: "'DM Sans', sans-serif",
             letterSpacing: "0.03em",
@@ -851,10 +854,11 @@ export default function AIFlowChat() {
             boxShadow:
               // data.loading || !data.prompt.trim() ? "none" :
               "0 0 20px rgba(110,231,247,0.3)",
-            bottom: "80px", // 👈 add this
-            right: "10%", // 👈 better spacing
-            zIndex: 1000, // 👈 VERY important
+            bottom: "50px", //
+            //
+            zIndex: 1000, //
             pointerEvents: "all",
+            float: "left",
           }}
         >
           <>
@@ -875,8 +879,10 @@ export default function AIFlowChat() {
             </svg>
           </>
         </button>
-         <button
-          onClick={()=>naviagate("/")}
+        <button
+          onClick={() => {
+            navigate("/");
+          }}
           className="nodrag "
           style={{
             marginTop: "50px",
@@ -886,10 +892,8 @@ export default function AIFlowChat() {
             border: "none",
             cursor: "pointer",
             margin: "auto",
-            background:
-              "linear-gradient(135deg, #6EE7F7, #818CF8)",
-            color:
-              "#0f1729",
+            background: "linear-gradient(135deg, #6EE7F7, #818CF8)",
+            color: "#0f1729",
             fontWeight: 700,
             position: "absolute",
             right: "0px",
@@ -904,14 +908,14 @@ export default function AIFlowChat() {
             boxShadow:
               // data.loading || !data.prompt.trim() ? "none" :
               "0 0 20px rgba(110,231,247,0.3)",
-            bottom: "80px", 
-            right: "10%", 
+            bottom: "50px",
+            right: "10%",
             zIndex: 1000,
             pointerEvents: "all",
           }}
         >
           <>
-           Visit All Chats
+            See Old Chats
             <svg
               width="14"
               height="14"
