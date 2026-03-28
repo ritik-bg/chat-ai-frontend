@@ -272,7 +272,7 @@ function InputNode({ data }) {
           </>
         ) : (
           <>
-            Send to AI
+            Run Flow
             <svg
               width="14"
               height="14"

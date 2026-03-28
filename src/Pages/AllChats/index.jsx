@@ -1,110 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import "./index.css";
 import { BASEURL } from "../../config/api.config";
 import { useNavigate } from "react-router";
 
-const MOCK_CHATS = [
-  {
-    id: 1,
-    title: "Explain quantum entanglement",
-    preview:
-      "Quantum entanglement is a phenomenon where two particles become correlated...",
-    model: "llama-3.3-70b",
-    time: "2m ago",
-    messages: 6,
-    tag: "science",
-  },
-  {
-    id: 2,
-    title: "React Flow custom nodes setup",
-    preview:
-      "To create custom nodes in React Flow, you need to define a nodeTypes object...",
-    model: "deepseek-r1",
-    time: "1h ago",
-    messages: 14,
-    tag: "code",
-  },
-  {
-    id: 3,
-    title: "Best way to structure a Node.js API",
-    preview:
-      "For a production Node.js API, I recommend organizing your project with controllers...",
-    model: "gemma-3-27b",
-    time: "3h ago",
-    messages: 9,
-    tag: "code",
-  },
-  {
-    id: 4,
-    title: "Write a poem about midnight rain",
-    preview:
-      "The silver needles fall through dark, Stitching silence to the park...",
-    model: "mistral-small",
-    time: "Yesterday",
-    messages: 4,
-    tag: "creative",
-  },
-  {
-    id: 5,
-    title: "Difference between TCP and UDP",
-    preview:
-      "TCP (Transmission Control Protocol) ensures reliable, ordered delivery of data...",
-    model: "llama-3.3-70b",
-    time: "Yesterday",
-    messages: 7,
-    tag: "science",
-  },
-  {
-    id: 6,
-    title: "How to center a div in CSS",
-    preview:
-      "The modern way is using flexbox: display flex, align-items center, justify-content center...",
-    model: "phi-3-mini",
-    time: "2 days ago",
-    messages: 3,
-    tag: "code",
-  },
-  {
-    id: 7,
-    title: "Summarize the French Revolution",
-    preview:
-      "The French Revolution (1789–1799) was a period of radical political and social transformation...",
-    model: "deepseek-chat",
-    time: "2 days ago",
-    messages: 5,
-    tag: "history",
-  },
-  {
-    id: 8,
-    title: "Generate startup name ideas",
-    preview:
-      "Here are some creative startup name ideas: Lumiq, Veloxa, Stratify, Nexora, Driftly...",
-    model: "gemma-3-27b",
-    time: "3 days ago",
-    messages: 11,
-    tag: "creative",
-  },
-  {
-    id: 9,
-    title: "Fix my Python recursion error",
-    preview:
-      "The issue is a missing base case in your recursive function. Add: if n <= 0: return 0...",
-    model: "deepseek-r1",
-    time: "4 days ago",
-    messages: 8,
-    tag: "code",
-  },
-  {
-    id: 10,
-    title: "What is the Fermi paradox?",
-    preview:
-      "The Fermi Paradox asks: given the high probability of extraterrestrial civilizations...",
-    model: "llama-3.3-70b",
-    time: "1 week ago",
-    messages: 6,
-    tag: "science",
-  },
-];
+
 
 const TAG_COLORS = {
   code: {
@@ -129,22 +28,38 @@ const TAG_COLORS = {
   },
 };
 
-export default function AllChats() {
+export default function AllChats({selected,setSelected}) {
   const [search, setSearch] = useState("");
   const [activeTag, setActiveTag] = useState("all");
-  const [selected, setSelected] = useState(null);
+  
   const [hoveredId, setHoveredId] = useState(null);
   const [prevousChats, setprevousChats] = useState([]);
   const tags = ["all", "code", "science", "creative", "history"];
   const naviagate = useNavigate();
 
-  const filtered = MOCK_CHATS.filter((c) => {
+const filtered = useMemo(() => {
+  if (!prevousChats?.length) return [];
+
+  const searchText = search?.toLowerCase() || '';
+
+  return prevousChats.filter((c) => {
     const matchSearch =
-      c.title.toLowerCase().includes(search.toLowerCase()) ||
-      c.preview.toLowerCase().includes(search.toLowerCase());
-    const matchTag = activeTag === "all" || c.tag === activeTag;
+      c?.prompt?.toLowerCase().includes(searchText) ||
+      c?.reply?.toLowerCase().includes(searchText);
+
+    const matchTag =
+      activeTag === 'all' || c?.tag === activeTag;
+
     return matchSearch && matchTag;
   });
+}, [prevousChats, search, activeTag]);
+
+const getPreview = (text = '', wordCount = 8) => {
+  const words = text.trim().split(/\s+/);
+  if (words.length <= wordCount) return text;
+  return words.slice(0, wordCount).join(' ') + '...';
+};
+
 
   const getchats = async () => {
     try {
@@ -154,9 +69,6 @@ export default function AllChats() {
       });
 
       const data = await res.json();
-
-      console.log("response of save chats", data);
-      console.log(data?.data, "data?.data");
       if (data?.data.length > 0) {
         setprevousChats(data.data);
       } else {
@@ -248,8 +160,8 @@ export default function AllChats() {
           {/* Stats */}
           <div className="stats-bar">
             <span className="stats-count">
-              <span>{filtered.length}</span> result
-              {filtered.length !== 1 ? "s" : ""}
+              <span>{filtered?.length}</span> result
+              {filtered?.length !== 1 ? "s" : ""}
             </span>
             <span
               className="stats-count"
@@ -271,27 +183,26 @@ export default function AllChats() {
           </div>
 
           {/* List */}
-          {filtered.length === 0 ? (
+          {filtered?.length === 0 ? (
             <div className="empty">
               <div className="empty-icon">🔍</div>
               <div className="empty-text">No chats match your search</div>
             </div>
           ) : (
             <div className="chat-list">
-              {prevousChats?.map((chat, i) => {
-                const tagColor = TAG_COLORS[chat.tag] || TAG_COLORS.code;
-
-                console.log(chat, "chat");
+              {filtered?.map((chat, i) => {
 
                 return (
                   <div
-                    key={chat.id}
-                    className={`chat-item ${selected === chat.id ? "selected" : ""}`}
+                    key={chat._id}
+                    className={`chat-item ${selected === chat._id ? "selected" : ""}`}
                     style={{ animationDelay: `${i * 40}ms` }}
                     onClick={() =>
-                      setSelected(chat.id === selected ? null : chat.id)
+                     { setSelected(chat._id === selected ? null : chat._id);
+                      naviagate("/chat-preview",{  state: {chat}})
+                     }
                     }
-                    onMouseEnter={() => setHoveredId(chat.id)}
+                    onMouseEnter={() => setHoveredId(chat._id)}
                     onMouseLeave={() => setHoveredId(null)}
                   >
                     <div className="chat-body">
@@ -323,7 +234,7 @@ export default function AllChats() {
                         >
                           <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
                         </svg>
-                        {chat.reply}
+                        {getPreview(chat.reply)}
                       </span>
                       <svg
                         width="14"
