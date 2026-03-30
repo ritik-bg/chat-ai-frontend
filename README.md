@@ -1,4 +1,4 @@
  To run this project
 
- -npm install first --force
+ -npm install --force
  -run npm run dev 
